@@ -7,29 +7,26 @@ FPS = 60
 ALTURA = 3
 ANCHO = 3
 
-BOX_SIZE = 100
-GAP_SIZE = 5
-MARGIN_SIZE = 20
-INFO_SIZE = 0
-WINDOW_WIDTH = (BOX_SIZE * ANCHO) + ((GAP_SIZE * ANCHO) - GAP_SIZE) + (MARGIN_SIZE * 2)
-WINDOW_HEIGHT = (BOX_SIZE * ALTURA) + ((GAP_SIZE * ALTURA) - GAP_SIZE) + (MARGIN_SIZE * 2) + INFO_SIZE
+TAM_CAJA = 100
+ESPACIO = 5
+MARGEN = 20
+ANCHO_VENTANA = (TAM_CAJA * ANCHO) + ((ESPACIO * ANCHO) - ESPACIO) + (MARGEN * 2)
+ALTO_VENTANA = (TAM_CAJA * ALTURA) + ((ESPACIO * ALTURA) - ESPACIO) + (MARGEN * 2)
 
-SHUFFLE_MOVES = ALTURA * ANCHO * 5
-FONT_SIZE = 32
-ANIMATE_SPEED = 20
+DESORDENAR = ALTURA * ANCHO * 5
+TAM_FUENTE = 32
+VELOCIDAD_ANIMACION = 20
 
-ROW_INDEX = 0
-CELL_INDEX = 1
+FILA = 0
+COL = 1
 
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (255, 0, 0)
-GREEN = (32, 192, 224)
-BLUE = (255, 255, 255)
+NEGRO = (0, 0, 0)
+BLANCO = (255, 255, 255)
+AZUL = (32, 192, 224)
 
-BOX_COLOR = GREEN
-FONT_COLOR = WHITE
-BG_COLOR = WHITE
+COLOR_CAJA = AZUL
+COLOR_FUENTE = BLANCO
+COLOR_FONDO = BLANCO
 
 LEFT = 'left'
 RIGHT = 'right'
@@ -44,9 +41,9 @@ def main():
     global DISPLAY_SURFACE, FPSCLOCK, FONT
     pygame.init()
 
-    FONT = pygame.font.Font("freesansbold.ttf", FONT_SIZE)
+    FONT = pygame.font.Font("freesansbold.ttf", TAM_FUENTE)
     FPSCLOCK = pygame.time.Clock()
-    DISPLAY_SURFACE = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+    DISPLAY_SURFACE = pygame.display.set_mode((ANCHO_VENTANA, ALTO_VENTANA))
     pygame.display.set_caption("juego")
 
     while True:
@@ -105,31 +102,31 @@ def game_start():
 
 def draw_board():
     """Draws the game board"""
-    DISPLAY_SURFACE.fill(BG_COLOR)
+    DISPLAY_SURFACE.fill(COLOR_FONDO)
     for row in range(len(BOARD)):
         for cell in range(len(BOARD[row])):
             if BOARD[row][cell] > 0:
                 x, y = get_box_position((row, cell))
-                draw_box((x, y, BOX_SIZE, BOX_SIZE), BOARD[row][cell])
+                draw_box((x, y, TAM_CAJA, TAM_CAJA), BOARD[row][cell])
 
 
 def get_box_position(box):
     """Returns the x and y coordinates of the specified box"""
-    row = box[ROW_INDEX]
-    cell = box[CELL_INDEX]
+    row = box[FILA]
+    cell = box[COL]
 
-    x = MARGIN_SIZE + (BOX_SIZE * cell) + (GAP_SIZE * cell)
-    y = MARGIN_SIZE + INFO_SIZE + (BOX_SIZE * row) + (GAP_SIZE * row)
+    x = MARGEN + (TAM_CAJA * cell) + (ESPACIO * cell)
+    y = MARGEN + (TAM_CAJA * row) + (ESPACIO * row)
     return x, y
 
 
 def draw_box(rect, num):
     """Draws the rect, with the num in middle"""
-    label = FONT.render(str(num), True, FONT_COLOR)
+    label = FONT.render(str(num), True, COLOR_FUENTE)
     label_rect = label.get_rect()
     box = pygame.Rect(rect)
     label_rect.center = box.center
-    pygame.draw.rect(DISPLAY_SURFACE, BOX_COLOR, box)
+    pygame.draw.rect(DISPLAY_SURFACE, COLOR_CAJA, box)
     DISPLAY_SURFACE.blit(label, label_rect)
 
 
@@ -141,8 +138,8 @@ def move(direction):
     RIGHTMOST = ANCHO - 1
 
     blank = find_blank()
-    row = blank[ROW_INDEX]
-    cell = blank[CELL_INDEX]
+    row = blank[FILA]
+    cell = blank[COL]
 
     if direction == UP and row != BOTTOM:
         value = BOARD[row + 1][cell]
@@ -188,20 +185,20 @@ def animate(start_box, end_box, num):
     end_x, end_y = get_box_position(end_box)
     delta_x, delta_y = end_x - x, end_y - y
     if delta_x + delta_y > 0:
-        x_step = y_step = ANIMATE_SPEED
+        x_step = y_step = VELOCIDAD_ANIMACION
     else:
-        x_step = y_step = -ANIMATE_SPEED
+        x_step = y_step = -VELOCIDAD_ANIMACION
 
     if delta_x != 0:
         for new_x in range(x, end_x, x_step):
             draw_board()
-            draw_box((new_x, y, BOX_SIZE, BOX_SIZE), num)
+            draw_box((new_x, y, TAM_CAJA, TAM_CAJA), num)
             pygame.display.update()
             FPSCLOCK.tick(FPS)
     elif delta_y != 0:
         for new_y in range(y, end_y, y_step):
             draw_board()
-            draw_box((x, new_y, BOX_SIZE, BOX_SIZE), num)
+            draw_box((x, new_y, TAM_CAJA, TAM_CAJA), num)
             pygame.display.update()
             FPSCLOCK.tick(FPS)
     else:
@@ -212,15 +209,15 @@ def play_win_screen():
     """Displays a message informing the player that they won"""
     global SHOW_WIN
     SHOW_WIN = False
-    DISPLAY_SURFACE.fill(BG_COLOR)
+    DISPLAY_SURFACE.fill(COLOR_FONDO)
     you_win_font = pygame.font.Font("freesansbold.ttf", 60)
     press_key_font = pygame.font.Font("freesansbold.ttf", 30)
-    you_win_label = you_win_font.render("You Win!", True, FONT_COLOR)
-    press_key_label = press_key_font.render("Press any key to reset", True, FONT_COLOR)
+    you_win_label = you_win_font.render("You Win!", True, NEGRO)
+    press_key_label = press_key_font.render("Press any key to reset", True, NEGRO)
     you_win_rect = you_win_label.get_rect()
     press_key_rect = press_key_label.get_rect()
-    you_win_rect.midbottom = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
-    press_key_rect.midtop = (WINDOW_WIDTH // 2, WINDOW_HEIGHT // 2)
+    you_win_rect.midbottom = (ANCHO_VENTANA // 2, ALTO_VENTANA // 2)
+    press_key_rect.midtop = (ANCHO_VENTANA // 2, ALTO_VENTANA // 2)
     DISPLAY_SURFACE.blit(you_win_label, you_win_rect)
     DISPLAY_SURFACE.blit(press_key_label, press_key_rect)
     pygame.display.update()
@@ -240,7 +237,7 @@ def play_win_screen():
 
 def shuffle():
     """Shuffles the board intelligently. Does not make invalid moves, or undo last move"""
-    global ANIMATE_SPEED
+    global VELOCIDAD_ANIMACION
     TOP = 0
     BOTTOM = ALTURA - 1
     LEFTMOST = 0
@@ -248,7 +245,7 @@ def shuffle():
     blank_row, blank_cell = find_blank()
 
     moves = []
-    for i in range(0, SHUFFLE_MOVES):
+    for i in range(0, DESORDENAR):
         previous_move = ""
         if i > 0:
             previous_move = moves[i - 1]
@@ -273,15 +270,15 @@ def shuffle():
         elif moves[i] == RIGHT:
             blank_cell -= 1
 
-    normal_animate_speed = ANIMATE_SPEED
-    ANIMATE_SPEED = SHUFFLE_MOVES // 4
+    normal_animate_speed = VELOCIDAD_ANIMACION
+    VELOCIDAD_ANIMACION = DESORDENAR // 4
     i = 1
     for direction in moves:
         if len(pygame.event.get(QUIT)) > 0 or pygame.key.get_pressed()[K_ESCAPE]:
             pygame.quit()
             sys.exit()
         move(direction)
-    ANIMATE_SPEED = normal_animate_speed
+    VELOCIDAD_ANIMACION = normal_animate_speed
 
 
 def undo():

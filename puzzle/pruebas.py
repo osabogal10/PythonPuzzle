@@ -36,9 +36,6 @@ def sign_in():
             print("Registrado")
             inicio_sesion=True
 
-
-sign_in()
-
 def registrar():
     with open('users.json', 'r') as lista:
         usuarios = json.load(lista)

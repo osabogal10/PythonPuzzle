@@ -1,7 +1,11 @@
 from tkinter import *
 from tkinter import ttk, font
-import numpy as np
 import json
+import os
+import pygame
+import sys
+import random
+from pygame.locals import *
 
 fal = bool(0)
 ver = bool(1)
@@ -11,40 +15,62 @@ using = ""
 usuario1 = ""
 user = ""
 passw = ""
-
+inicio_sesion = False
 
 def iniciar_sesion():
-    print("hola1")
-    jsonloads = json.loads(open('users.json').read())  # Load the json
-    print(jsonloads['Usernames'][0]['pass'])
-    # user = input("Enter your username: ") #Get username as a string
-    for i in range(len(jsonloads['Usernames'])):  # Iterate through usernames
-        print(i)
-        print(passw)
-        if jsonloads['Usernames'][i]['user'] == user:  # If the username is what they entered
-            print("user")
-            # passw = input("New password: ") #Ask for new password
-            if jsonloads['Usernames'][i]['pass'] == passw:
-                # jsonFile = open("users.json", "w+") #Open the json
-                # jsonFile.write(json.dumps(jsonloads, indent=4)) #Write
-                # jsonFile.close() #Close it
-                print("iniciado")
-                break  # Break out of the for loop
-    # else:
-    # registrar_usuario()
+    global inicio_sesion, user, passw
+
+    user = Campo0.get()
+    passw = Campo1.get()
+
+    etiq2.configure(text="iniciando")
+
+    with open("users.json") as lista:
+        usuarios = json.load(lista)
+        print(usuarios)
+        for usuario in usuarios:
+            print(usuario.get("user"))
+            if usuario.get("user") == user:
+                print(usuario.get("password"))
+                if usuario.get("password") == passw:
+                    print("Autenticado")
+                    etiq2.configure(text="Confirmado")
+                    inicio_sesion = True
+                    break
+        if not inicio_sesion:
+            etiq2.configure(text="Usuario no registrado")
 
 
-# def registrar_usuario():
-#    item = {"Password":passw} #Make a dict
-#   jsonloads["Usernames"].update({user: item}) #Add that dict to "Usernames"
-#    with open('users.json','w') as f: #Open the json
-#        f.write(json.dumps(jsonloads, indent=4)) #Write
+def registrar():
+    global inicio_sesion, user, passw
+
+    user = Campo0.get()
+    passw = Campo1.get()
+    verificar_nickname()
+    verificar_clave()
+
+    with open('users.json', 'r') as lista:
+        usuarios = json.load(lista)
+        nuevo_user = {}
+        nuevo_user["user"]=user
+        nuevo_user["password"]=passw
+        print(nuevo_user)
+        usuarios.append(nuevo_user)
+        lista.close()
+
+    os.remove('users.json')
+    with open('users.json', 'w') as lista:
+        json.dump(usuarios,lista, indent=4)
+        lista.close()
+    etiq2.configure(text="Registrado.")
+    Campo0.delete(0,"end")
+    Campo1.delete(0,"end")
 
 
-def nickname():
+def verificar_nickname():
     if len(a) > 0:
         a.pop(0)
-    nombre_usuario = usuario.get()
+    nombre_usuario = user
     long = len(nombre_usuario)  # Calcular la longitud del nomre de usuario
     y = nombre_usuario.isalnum()  # Calcula que la cadena contenga valores alfanuméricos
 
@@ -57,17 +83,17 @@ def nickname():
         print("El nombre de usuario no puede contener más de 12 caracteres")
         print(nombre_usuario)
     if long > 5 and long < 13 and y == True:
-        using = usuario.get()
-        texto = "Hola " + nombre_usuario
-        usuario.set(texto)
-        a.append(1)
+        #using = usuario.get()
+        #texto = "Hola " + nombre_usuario
+        #usuario.set(texto)
+        #a.append(1)
         return ver  # Verdadero si el tamaño es mayor a 5 y menor a 13
 
 
-def clave():
+def verificar_clave():
     if len(b) > 0:
         b.pop(0)
-    contraseña_usuario = contraseña.get()
+    contraseña_usuario = passw
     validar = False  # que se vayan cumpliendo los requisitos uno a uno.
     long = len(contraseña_usuario)  # Calcula la longitud de la contraseña
     espacio = False  # variable para identificar espacios
@@ -164,7 +190,7 @@ def ventana():
 # ventana.......................................................................
 
 raiz = Tk()
-raiz.geometry('580x160')
+raiz.geometry('700x170')
 raiz.configure(bg='red')
 raiz.title('registro')
 
@@ -174,12 +200,13 @@ valor = StringVar()
 var = IntVar()
 
 marco = ttk.Frame(raiz, borderwidth=5, relief="ridge", padding=(110, 5))
-botonI = ttk.Button(marco, text="INGRESAR", padding=(4, 4), command=registrar_usuario)
-botonA = ttk.Button(marco, text="ACEPTAR", padding=(2, 5), command=iniciar_sesion)
+botonI = ttk.Button(marco, text="REGISTRAR", padding=(4, 4), command=registrar)
+botonA = ttk.Button(marco, text="INICIAR", padding=(2, 5), command=iniciar_sesion)
 etiq0 = ttk.Label(marco, text="Nombre de Usuario ", font=fuente, padding=(10, 5))
 etiq1 = ttk.Label(marco, text="Contraseña ", font=fuente, padding=(10, 5))
+etiq2 = ttk.Label(marco, text="", font=fuente, padding=(10, 5))
 Campo0 = ttk.Entry(marco, textvariable=user, width=25)
-Campo1 = ttk.Entry(marco, textvariable=passw, width=25)
+Campo1 = ttk.Entry(marco, textvariable=passw, width=25, show='*')
 
 botonI.grid(row=2, column=0, columnspan=2)
 botonA.grid(row=2, column=3, columnspan=2)
@@ -187,6 +214,7 @@ marco.grid(row=0, column=0, padx=10, pady=20, sticky=(N, S, E, W))
 Campo0.grid(row=1, column=0, columnspan=2)
 Campo1.grid(row=1, column=4, columnspan=2)
 etiq0.grid(row=0, column=0, padx=0, pady=0, sticky=(N, S, E, W))
-etiq1.grid(row=0, column=4, padx=5, pady=0, sticky=(N, S, E, W))
+etiq1.grid(row=0, column=4, padx=0, pady=0, sticky=(N, S, E, W))
+etiq2.grid(row=3, column=3, padx=0, pady=0, sticky=(N, S, E, W))
 
 raiz.mainloop()
